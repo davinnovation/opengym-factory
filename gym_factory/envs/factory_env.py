@@ -37,7 +37,7 @@ class FactoryEnv(gym.Env):
     def _step(self, action):
         state_cur = self.get_state()
         self._next_state(action) # self.machines_remain_capa, self.job_slots
-        
+
         if self._goal_test():
             reward = +1
             done = True
@@ -59,15 +59,15 @@ class FactoryEnv(gym.Env):
         self.job_slots = [] # state 2 ( job )
         for i in range(self.job_slot_num):
             self.job_slots.append([])
-        
+
         self.machine_types = list(self.machines_remain_capa.keys())
 
         self.machine_type_list = []
-        
+
         for mtype in self.machine_types:
             for _ in self.machines_remain_capa[mtype]:
                 self.machine_type_list.append(mtype)
-        
+
         self.job_slots = allocate_jobsTojobslots(jobs, self.job_slots)
 
     def _render(self, mode='human',close=False):
@@ -79,13 +79,21 @@ class FactoryEnv(gym.Env):
         # check job_slot_empty == all job allocated
         # check job can't allocate to remain job
         flag = True
+        sum_of_mask = 0
+        for job_slot in self.get_state()[-1]:
+            if job_slot[0] != 0:
+                sum_of_mask += sum(job_slot[1:])
+
+        if sum_of_mask == 0:
+            return True
+
         for job_slot in self.job_slots:
             if len(job_slot) > 0:
                 for remain_capa in self.machines_remain_capa[job_slot[0][1]]:
                     if job_slot[0][0] <= remain_capa:
                         flag = False
                         return flag
-         
+
         return flag
 
     def _next_state(self, action):
@@ -96,7 +104,7 @@ class FactoryEnv(gym.Env):
         allocate_machine_num = allocate_machine[0]
 
         num = 0
-        
+
         break_out = False
         for mtype in self.machine_types:
             for count, _ in enumerate(self.machines_remain_capa[mtype]):
@@ -107,18 +115,23 @@ class FactoryEnv(gym.Env):
                 num+=1
             if break_out:
                 break
-        
+
         try:
-            job = self.job_slots[allocate_job_slot].pop(0)
+            job = self.job_slots[allocate_job_slot][0]
             temp_capa = self.machines_remain_capa[allocate_machine_type][allocate_machine_type_num]
             temp_capa -= job[0]
             if temp_capa < 0:
-                raise ValueError("too much minus " + str(temp_capa) + '_' + str(job[0]) + '_' + 
-                str(self.machines_remain_capa[allocate_machine_type][allocate_machine_type_num]))
+                raise ValueError("too much minus | remain_machine_capa "+str(allocate_job_slot)+ ": " + str(temp_capa) +
+                 ' | allocated capa '+str(allocate_machine_type_num)  +': ' + str(job[0]) + '_' +
+                str(self.machines_remain_capa[allocate_machine_type][allocate_machine_type_num]), str(self.get_state()))
+            self.job_slots[allocate_job_slot].pop(0)
             self.machines_remain_capa[allocate_machine_type][allocate_machine_type_num] = temp_capa
 
         except ValueError as e:
             print(e)
+        except IndexError as e:
+            print(e)
+            print(str(self.get_state())+'| allocated_job_slot' + str(allocate_job_slot))
 
     def _get_obs(self):
         raise ValueError("Not yet")
@@ -133,18 +146,18 @@ class FactoryEnv(gym.Env):
         if mode == 'number':
             ret = []
             # get machine remain capa
-            
+
             for mtype in self.machine_types:
                 for remain_capa in self.machines_remain_capa[mtype]:
                     ret.append(remain_capa)
 
             # job_slot remain
             ret.append(calculate_mask(self.job_slots, self.machines_remain_capa, self.machine_types))
-            
+
         else:
             raise ValueError("Not Implemented")
 
-        return ret 
-    
+        return ret
+
     def rule_based_mask(self):
         raise ValueError("Working")

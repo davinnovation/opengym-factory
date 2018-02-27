@@ -8,16 +8,22 @@ def calculate_mask(job_slots, machines_remain_capa, machine_types):
     for mtype in machine_types:
         for _ in machines_remain_capa[mtype]:
             machine_type_list.append(mtype)
-    
+
     for jobs in job_slots:
         if len(jobs) > 0:
             # usage capa of job
             capa = jobs[0][0]
-            
+            job_type = jobs[0][1]
             mask = []
-            # check machine_type
-            for mtype in machine_type_list:
-                if jobs[0][1] == mtype:
+
+            matching_capa = {}
+            # check machine_type and remain capa
+            for count, mtype in enumerate(machine_type_list):
+
+                if mtype in matching_capa.keys(): matching_capa[mtype] +=1
+                else: matching_capa[mtype] = 0
+
+                if job_type == mtype and machines_remain_capa[mtype][matching_capa[mtype]] >= capa:
                     mask.append(1)
                 else:
                     mask.append(0)
@@ -25,10 +31,10 @@ def calculate_mask(job_slots, machines_remain_capa, machine_types):
             # check job flow
             if check_pre_job_remain(job_slots, jobs[0][-1]):
                 mask = [0 for _ in mask] # make all unavailable
-            
+
             # check can't allocate to machine type
             flag_ = True
-            for remain_capa in machines_remain_capa[jobs[0][1]]:
+            for remain_capa in machines_remain_capa[job_type]:
                 if remain_capa >= capa:
                     flag_ = False
             if flag_:
@@ -37,9 +43,10 @@ def calculate_mask(job_slots, machines_remain_capa, machine_types):
         else:
             capa = 0
             mask = [0] * ( 1 + len(machine_type_list)) # zero capa, all unavailable mask
-        
+
         ret.append([capa] + mask)
     return ret
+
 
 def check_pre_job_remain(job_slots, job_id):
     job_name, job_seq = job_id.split('_')
