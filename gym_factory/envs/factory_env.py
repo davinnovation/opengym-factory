@@ -2,11 +2,11 @@ import gym
 from gym import error, spaces, logger
 from gym.utils import seeding
 
-from env_util import sample_job_gen
-from job_slot_util import get_job_slots_uses, find_min_usage, allocate_jobsTojobslots
-from machine_util import initalize_factory
-from job_util import generate_jobs
-from selective_masking import calculate_mask
+from .env_util import sample_job_gen
+from .job_slot_util import get_job_slots_uses, find_min_usage, allocate_jobsTojobslots
+from .machine_util import initalize_factory
+from .job_util import generate_jobs
+from .selective_masking import calculate_mask
 
 import numpy as np
 

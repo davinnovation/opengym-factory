@@ -18,3 +18,4 @@ install:
   - pip install --only-binary=numpy,scipy numpy gym
 
 script:
+  - python tests/test.py

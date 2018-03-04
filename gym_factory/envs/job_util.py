@@ -1,4 +1,4 @@
-from env_util import EXAMPLE_JOB, GENERATE_JOB_MESSAGE
+from .env_util import EXAMPLE_JOB, GENERATE_JOB_MESSAGE
 
 def generate_jobs(generate_job):
     temp_job = generate_job()

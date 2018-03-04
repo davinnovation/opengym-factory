@@ -2,6 +2,12 @@ from gym.envs.registration import register
 
 register(
     id='factory-v0',
+    entry_point='gym_factory.envs.factory_env:FactoryEnv'
+)
+
+"""
+register(
+    id='factory-v0',
     entry_point='gym_factory.envs:FactoryEnv_S'
 )
 
@@ -29,3 +35,4 @@ register(
     id='factory-v0',
     entry_point='gym_factory.envs:FactoryEnv_JS'
 )
+"""
