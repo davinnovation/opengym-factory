@@ -39,3 +39,5 @@ Thumbs.db
 # python generated #
 .ipynb_checkpoints
 __pycache__
+
+.vscode
